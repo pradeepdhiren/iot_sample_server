@@ -45,3 +45,18 @@ def led(uname):
 	data = json.loads(dumps(cur))
 	
 	return data[0]['val']
+
+@app.route('/sensor/<uname>/<val>')
+def sensor(uname, val):
+
+	cur = db.iot_sensor.insert({'uname': uname, 'val': val, 'time_stamp': time.time()})
+
+	return {'response': 'Sensor Value Added', 'val': val}
+	
+@app.route('/sensor/<uname>')
+def sensor(uname):
+
+	cur = db.iot_sensor.find({'uname': uname})
+	data = json.loads(dumps(cur))
+	
+	return {'response': data}
