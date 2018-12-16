@@ -9,8 +9,8 @@ import time
 
 app = Bottle(__name__)
 
-# client = MongoClient('')
-# db = client.db_name
+client = MongoClient('mongodb://heroku_j47rhw75:2ctpo13v9ptj497mqf7q1o1aps@ds151909.mlab.com:51909/heroku_j47rhw75')
+db = client.heroku_j47rhw75
 
 @app.hook('after_request')
 def enable_cors():
@@ -23,17 +23,25 @@ def enable_cors():
 def root():
 	return {'data': 'Server root'}
 
-# @app.route('/led')
-# def led():
+@app.route('/led/<uname>/<val>')
+def led(uname, val):
 
-# 	cur = db.led.find()
-# 	data = json.loads(dumps(cur))
+	cur = db.iot_led.find({'uname': uname})
+	data = json.loads(dumps(cur))
+
+	if(len(data) == 0):
+		cur = db.iot_led.insert({'uname': uname, 'val': val, 'time_stamp': time.time()})
+
+		return {'response': 'New User Added', 'val': val}
+	else:
+		cur = db.iot_led.update({'uname': uname}, {'$set': {'val': val, 'time_stamp': time.time()}})
+
+		return {'response': 'LED Toggled', 'val': val}
+
+@app.route('/led/<uname>')
+def led(uname):
+
+	cur = db.iot_led.find({'uname': uname})
+	data = json.loads(dumps(cur))
 	
-# 	return data[0]['val']
-
-# @app.route('/led/<val>')
-# def led(val):
-
-# 	cur = db.led.update({"_id": ObjectId("")}, {'$set': {'val': str(val)}})
-
-# 	return "LED Val: " + str(val)
+	return data[0]['val']
